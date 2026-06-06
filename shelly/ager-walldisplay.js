@@ -1,33 +1,39 @@
-// Shelly-Script für den Wall Display: holt die aktuelle Wassertemperatur der
-// Ager (Raudaschlsäge) aus der kleinen ager.json und schreibt sie in eine
-// Virtual-Number-Komponente, die du als Kachel auf den Homescreen legst.
+// Shelly-Script für den Wall Display.
+// Holt die Wassertemperatur der Ager (Raudaschlsäge) aus der kleinen ager.json
+// und zeigt sie als Virtual-Number-Kachel an.
 //
-// Einrichtung siehe shelly/README.md
+// BESONDERHEIT: Das Script legt die Number-Komponente beim ersten Start
+// AUTOMATISCH an – du musst also nichts manuell erstellen.
 //
-// mJS (Shelly Gen2/Gen3 Scripting). Bewusst einfach gehalten.
+// Einrichtung:
+//   1) Shelly-App -> Walldisplay -> Scripts ({}) -> Add script
+//   2) Diesen Inhalt einfügen, ggf. nur die url anpassen
+//   3) Save -> Start -> "Run on startup" aktivieren
+//   4) Danach am Display die Kachel hinzufügen:
+//      Homescreen -> von oben nach unten wischen -> + -> Virtual components
+//      -> "Ager Raudaschlsäge" -> rechts unten platzieren
+//
+// mJS (Shelly Gen2/Gen3 Scripting).
 
 let CONFIG = {
-  // Öffentliche URL deiner ager.json (GitHub Pages). USERNAME ggf. anpassen.
+  // Öffentliche URL deiner ager.json (GitHub Pages):
   url: "https://tonymaroni333.github.io/Ager-temp/ager.json",
 
-  // ID deiner Virtual-Number-Komponente, z.B. 200 für "number:200".
-  // Im Web-Interface unter Settings -> Virtual components anlegen & ID ablesen.
-  numberId: 200,
+  // Anzeigename der Kachel:
+  componentName: "Ager Raudaschlsäge",
 
-  // Aktualisierungsintervall in Sekunden (1800 = 30 Minuten).
+  // Bevorzugte ID. Auf einem Gerät ohne weitere Virtual Components wird die
+  // erste angelegte Komponente üblicherweise number:200.
+  preferredId: 200,
+
+  // Aktualisierungsintervall in Sekunden (1800 = 30 Minuten):
   updateEverySec: 1800,
 };
 
-function applyValue(data) {
-  if (typeof data.celsius !== "number") {
-    print("Ager: kein gültiger Wert in JSON");
-    return;
-  }
-  Shelly.call("Number.Set", { id: CONFIG.numberId, value: data.celsius });
-  print("Ager aktualisiert:", data.celsius, "°C  (Stand", data.measuredAtText, ")");
-}
+let numberId = null;
 
-function update() {
+function fetchAndSet() {
+  if (numberId === null) return;
   Shelly.call(
     "HTTP.GET",
     { url: CONFIG.url, timeout: 10, ssl_ca: "*" },
@@ -47,11 +53,51 @@ function update() {
         print("Ager: JSON konnte nicht gelesen werden");
         return;
       }
-      applyValue(data);
+      if (typeof data.celsius !== "number") {
+        print("Ager: kein gültiger Wert");
+        return;
+      }
+      Shelly.call("Number.Set", { id: numberId, value: data.celsius });
+      print("Ager aktualisiert:", data.celsius, "°C (Stand", data.measuredAtText + ")");
     }
   );
 }
 
-// Direkt beim Start einmal aktualisieren, danach periodisch.
-update();
-Timer.set(CONFIG.updateEverySec * 1000, true, update);
+function startLoop() {
+  fetchAndSet();
+  Timer.set(CONFIG.updateEverySec * 1000, true, fetchAndSet);
+}
+
+function createComponent() {
+  Shelly.call(
+    "Virtual.Add",
+    {
+      type: "number",
+      config: {
+        name: CONFIG.componentName,
+        meta: { ui: { view: "label", unit: "°C", step: 0.1 } },
+      },
+    },
+    function (res, err, msg) {
+      if (err !== 0 || res === null) {
+        print("Ager: Komponente anlegen fehlgeschlagen:", err, msg);
+        return;
+      }
+      // res.id ist z.B. "number:200" -> numerische ID extrahieren
+      numberId = JSON.parse(res.id.split(":")[1]);
+      print("Ager: Komponente angelegt -> number:" + JSON.stringify(numberId));
+      startLoop();
+    }
+  );
+}
+
+// Schon vorhanden? Dann wiederverwenden, sonst automatisch anlegen.
+Shelly.call("Number.GetConfig", { id: CONFIG.preferredId }, function (res, err) {
+  if (err === 0 && res !== null) {
+    numberId = CONFIG.preferredId;
+    print("Ager: nutze vorhandene number:" + JSON.stringify(numberId));
+    startLoop();
+  } else {
+    createComponent();
+  }
+});

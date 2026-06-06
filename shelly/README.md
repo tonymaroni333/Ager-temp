@@ -43,30 +43,25 @@ Teste die URL im Browser – es sollte etwa so aussehen:
 {"celsius":12.3,"unit":"°C","station":"Ager / Raudaschlsäge","measuredAtText":"06.06. 14:45", ...}
 ```
 
-## Schritt 2 – Virtual Number am Wall Display anlegen
+## Schritt 2 – Script hinzufügen (legt die Komponente automatisch an)
 
-1. Wall Display lokal im Browser öffnen (IP des Geräts) **oder** in der Shelly-App
-   das Gerät → **Einstellungen**.
-2. **Virtual components → Add component → Number**.
-3. Einstellungen der Komponente:
-   - **Name:** `Ager Raudaschlsäge`
-   - **Unit:** `°C`
-   - **Min/Max:** z.B. `0 / 30`
-   - **Decimals:** `1`
-   - **View:** `Label`
-4. **ID merken** – z.B. `number:200` (die Zahl `200` brauchst du gleich).
+Die Number-Komponente musst du **nicht** von Hand erstellen – das Script macht
+das beim ersten Start selbst.
 
-## Schritt 3 – Script hinzufügen
-
-1. Am Wall Display: **Settings → Scripts → Add script**.
+1. Shelly-App → **Walldisplay → Scripts ({})  → Add script**
+   (oder Web-Interface → Scripts).
 2. Inhalt von [`ager-walldisplay.js`](./ager-walldisplay.js) hineinkopieren.
-3. Oben im Script anpassen:
-   - `url`  → deine Pages-URL aus Schritt 1
-   - `numberId` → die Zahl aus Schritt 2 (z.B. `200`)
+3. Oben im Script ggf. die `url` (deine Pages-URL aus Schritt 1) prüfen.
 4. **Speichern**, **Start**, und **„Run on startup"** aktivieren.
-5. In der Konsole sollte erscheinen: `Ager aktualisiert: 12.3 °C (Stand ...)`.
+5. In der Konsole sollte erscheinen:
+   `Ager: Komponente angelegt -> number:200` und kurz darauf
+   `Ager aktualisiert: 18.8 °C (Stand ...)`.
 
-## Schritt 4 – Kachel rechts unten platzieren
+> Möchtest du die Komponente lieber selbst anlegen (z.B. anderes Icon)? Das geht
+> im **Web-Interface** (Geräte-IP im Browser) → **User-defined components →
+> Create new → Number**. Dann im Script `preferredId` auf die ID setzen.
+
+## Schritt 3 – Kachel rechts unten platzieren
 
 1. Auf dem Homescreen vom oberen Rand **nach unten wischen**.
 2. **+**-Symbol → **Virtual components** → `Ager Raudaschlsäge` auswählen.
