@@ -26,6 +26,7 @@ let CONFIG = {
 };
 
 let numberId = null;
+let lastName = "";
 
 // Kurzname + Einheit + Wassertropfen-Icon setzen.
 function applyLook() {
@@ -51,7 +52,19 @@ function fetchAndSet() {
       try { data = JSON.parse(res.body); } catch (e) { print("Ager: JSON-Fehler"); return; }
       if (typeof data.celsius !== "number") { print("Ager: kein Wert"); return; }
       Shelly.call("Number.Set", { id: numberId, value: data.celsius });
-      print("Ager aktualisiert:", data.celsius, "C");
+
+      // Mess-Uhrzeit (HH:MM) hinter den Namen, z.B. "Ager 18:00"
+      let parts = data.measuredAtText.split(" ");
+      let hhmm = parts[parts.length - 1];
+      let newName = CONFIG.componentName + " " + hhmm;
+      if (newName !== lastName) {
+        lastName = newName;
+        Shelly.call("Number.SetConfig", {
+          id: numberId,
+          config: { name: newName, meta: { ui: { view: "label", unit: "°C", icon: CONFIG.iconUrl } } },
+        });
+      }
+      print("Ager aktualisiert:", data.celsius, "C", hhmm);
     }
   );
 }
