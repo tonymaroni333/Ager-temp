@@ -75,7 +75,7 @@ function createComponent() {
       type: "number",
       config: {
         name: CONFIG.componentName,
-        meta: { ui: { view: "label", unit: "°C", step: 0.1 } },
+        meta: { ui: { view: "label", unit: "°C" } },
       },
     },
     function (res, err, msg) {
