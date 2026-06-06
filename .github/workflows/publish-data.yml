@@ -1,0 +1,60 @@
+name: Publish Ager data
+
+# Veröffentlicht alle 30 Minuten eine winzige ager.json über GitHub Pages,
+# damit der Shelly Wall Display (oder andere Geräte) den Wert abrufen können.
+#
+# WICHTIG: Geplante (cron) Läufe funktionieren nur, wenn diese Workflow-Datei
+# auf dem DEFAULT-Branch des Repos liegt. Per "Run workflow" (workflow_dispatch)
+# lässt sie sich aber von jedem Branch aus manuell starten/testen.
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/fetch-ager.mjs"
+      - ".github/workflows/publish-data.yml"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Fetch & build ager.json
+        run: node tools/fetch-ager.mjs public/ager.json
+
+      - name: Add a tiny index page
+        run: |
+          cat > public/index.html <<'HTML'
+          <!doctype html><meta charset="utf-8"><title>Ager Wassertemperatur</title>
+          <p>Aktuelle Daten: <a href="./ager.json">ager.json</a></p>
+          HTML
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4

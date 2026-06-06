@@ -78,6 +78,15 @@ gradle wrapper --gradle-version 8.9
 # Ergebnis: app/build/outputs/apk/debug/app-debug.apk
 ```
 
+## Shelly Wall Display
+
+Die Temperatur lässt sich auch als Kachel auf einem **Shelly Wall Display**
+anzeigen. Eine GitHub Action veröffentlicht dafür alle 30 Minuten eine winzige
+`ager.json` (über GitHub Pages), die ein kleines Shelly-Script in eine
+Virtual-Number-Komponente schreibt.
+
+➡️ Anleitung: [`shelly/README.md`](shelly/README.md)
+
 ## Technik
 
 - Sprache: **Kotlin**, reines Android-SDK (keine schweren Abhängigkeiten).
