@@ -19,7 +19,7 @@
 let CONFIG = {
   url: "https://tonymaroni333.github.io/Ager-temp/ager.json",
   componentName: "Ager",
-  iconUrl: "https://tonymaroni333.github.io/Ager-temp/drop.svg",
+  iconUrl: "https://tonymaroni333.github.io/Ager-temp/drop.png",
   // Bevorzugte ID. Erste angelegte Virtual-Komponente ist üblicherweise number:200.
   preferredId: 200,
   updateEverySec: 1800, // 30 Minuten
