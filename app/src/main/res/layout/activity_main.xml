@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#0E1116">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Wassertemperatur"
+            android:textColor="#9FB3C8"
+            android:textSize="16sp"
+            android:layout_marginTop="24dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ager · Raudaschlsäge"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/main_temp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="–"
+            android:textColor="#4FC3F7"
+            android:textSize="64sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp" />
+
+        <TextView
+            android:id="@+id/main_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Noch keine Daten geladen."
+            android:textColor="#9FB3C8"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/main_refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Aktualisieren"
+            android:layout_marginTop="24dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tipp: Lege das Widget auf den Homescreen, indem du lange auf eine freie Stelle tippst → „Widgets" → „Ager Wassertemperatur"."
+            android:textColor="#9FB3C8"
+            android:textSize="13sp"
+            android:layout_marginTop="40dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Datenquelle: Land Oberösterreich – Hydrographischer Dienst (data.ooe.gv.at), lizenziert unter CC BY 4.0. Dieselbe Quelle wie wassertemperatur.at."
+            android:textColor="#5E6B7A"
+            android:textSize="12sp"
+            android:layout_marginTop="24dp"
+            android:paddingBottom="24dp" />
+
+    </LinearLayout>
+
+</ScrollView>
