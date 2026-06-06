@@ -58,7 +58,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tipp: Lege das Widget auf den Homescreen, indem du lange auf eine freie Stelle tippst → „Widgets" → „Ager Wassertemperatur"."
+            android:text="Tipp: Widget hinzufügen – lange auf eine freie Stelle des Homescreens tippen, dann Widgets öffnen und Ager Wassertemperatur auswählen."
             android:textColor="#9FB3C8"
             android:textSize="13sp"
             android:layout_marginTop="40dp" />
