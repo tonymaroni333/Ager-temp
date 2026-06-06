@@ -15,6 +15,7 @@ on:
     paths:
       - "tools/fetch-ager.mjs"
       - ".github/workflows/publish-data.yml"
+      - "public/**"
 
 permissions:
   contents: read
