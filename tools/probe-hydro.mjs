@@ -49,22 +49,14 @@ console.log("Ager/Raudaschlsäge SANR =", sanr);
 }
 
 if (sanr) {
-  const base = "https://hydro.ooe.gv.at/daten/internet/stations";
-  const candidates = [
-    `${base}/OG/${sanr}/WT/hour.json`,
-    `${base}/OG/${sanr}/WT/current.json`,
-    `${base}/OG/${sanr}/WT/last.json`,
-    `${base}/OG/${sanr}/WT/S.json`,
-    `${base}/OG/${sanr}/index.json`,
-  ];
-  for (const url of candidates) {
-    try {
-      const r = await text(url, { headers: { "User-Agent": "Mozilla/5.0" } });
-      console.log("----", url, "=>", r.status, "len", r.len);
-      // index.json komplett ausgeben, um zu sehen, ob der aktuelle Wert drinsteht.
-      if (r.status === 200) console.log(url.indexOf("index.json") !== -1 ? r.body : r.body.slice(0, 200));
-    } catch (e) {
-      console.log("----", url, "=> ERROR", e.message);
-    }
-  }
+  // Test: unterstützt der Server HTTP-Range (nur die letzten Bytes holen)?
+  const weekUrl = `https://hydro.ooe.gv.at/daten/internet/stations/OG/${sanr}/WT/week.json`;
+  const rng = await fetch(weekUrl, { headers: { "Range": "bytes=-1500", "User-Agent": "Mozilla/5.0" } });
+  const rbody = await rng.text();
+  console.log("RANGE status:", rng.status);
+  console.log("RANGE accept-ranges:", rng.headers.get("accept-ranges"));
+  console.log("RANGE content-length:", rng.headers.get("content-length"));
+  console.log("RANGE content-range:", rng.headers.get("content-range"));
+  console.log("RANGE body length:", rbody.length);
+  console.log("RANGE tail:", rbody.slice(-160));
 }
