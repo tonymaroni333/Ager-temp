@@ -1,78 +1,47 @@
 # Ager-Wassertemperatur auf dem Shelly Wall Display
 
 Zeigt die Wassertemperatur der Ager (Raudaschlsäge) als Kachel auf dem
-Homescreen des Wall Display an – genau wie deine vorhandenen Kacheln
-„Hütte 29.1°" oder „Cellar 18.4°".
+Homescreen des Wall Display an – inkl. Wassertropfen-Icon und Mess-Uhrzeit
+(z. B. „Ager 08:30").
 
-## So funktioniert es
+## So funktioniert es (verlässlich, ohne Zwischenstelle)
 
 ```
-data.ooe.gv.at (ZRXP)  ──►  GitHub Action (alle 30 Min)  ──►  ager.json (GitHub Pages)
-                                                                     │
-                                                                     ▼
-                                          Shelly-Script  ──►  Virtual Number  ──►  Kachel
+hydro.ooe.gv.at  ── HTTP-Range (letzte ~1,5 KB) ──►  Shelly-Script ──►  Virtual Number ──►  Kachel
 ```
 
-Der Wall Display kann die große offizielle Datei nicht selbst verarbeiten
-(zu groß fürs Script). Deshalb erzeugt eine GitHub Action daraus eine winzige
-`ager.json`, die das Shelly-Script problemlos abruft.
+Das Shelly-Script holt alle 15 Minuten **direkt** die offizielle OÖ-Quelle.
+Die komplette Wochendatei (`week.json`) ist ~30 KB und damit zu groß für den
+Script-Puffer (~8 KB) – deshalb wird per **HTTP-Range** nur das **Ende der Datei**
+(die letzten ~1,5 KB) geladen. Darin steht die jüngste Messung, die das Script
+herausparst. Es gibt **keine Abhängigkeit von GitHub oder Cloudflare** – damit
+kann nichts „einfrieren".
 
----
+> Station: **5320** (Ager/Raudaschlsäge), Parameter **WT** (Wassertemperatur).
+> Endpunkt: `https://hydro.ooe.gv.at/daten/internet/stations/OG/5320/WT/week.json`
+> Quelle: Land Oberösterreich – Hydrographischer Dienst, CC BY 4.0.
 
-## Schritt 1 – ager.json öffentlich bereitstellen (GitHub Pages)
+## Einrichtung
 
-1. Im Repo: **Settings → Pages**.
-2. Bei **Source**: **GitHub Actions** auswählen.
-3. Der Workflow **„Publish Ager data"** unter **Actions** erzeugt und veröffentlicht
-   die Datei. Einmal manuell starten: **Actions → Publish Ager data → Run workflow**.
-4. Danach ist sie erreichbar unter:
-   `https://<DEIN-GITHUB-NAME>.github.io/Ager-temp/ager.json`
-   (für `tonymaroni333`: `https://tonymaroni333.github.io/Ager-temp/ager.json`)
+1. Shelly-App → **Walldisplay → Scripts ({}) → Add script**.
+2. Inhalt von [`ager-walldisplay.js`](./ager-walldisplay.js) einfügen.
+3. **Save → Start →** „Run on startup" aktivieren.
+   - Beim ersten Start legt das Script die Number-Komponente **automatisch** an.
+   - Konsole/Effekt: `Ager: 17.5 C 08:30`.
+4. Kachel platzieren: Homescreen → von oben wischen → **+ → Virtual components →
+   „Ager"** → an die gewünschte Stelle ziehen.
 
-> Hinweise:
-> - **Automatik alle 30 Min** (cron) läuft nur, wenn die Workflow-Datei auf dem
->   **Default-Branch** liegt. Dazu den Branch `claude/ager-water-temp-widget-QplSy`
->   nach `main` mergen (oder den Default-Branch umstellen).
-> - GitHub Pages eines **privaten** Repos braucht ggf. einen kostenpflichtigen Plan.
->   Alternativen: das Repo öffentlich machen (es enthält nur offene Daten + App-Code,
->   keine Geheimnisse) – dann funktioniert Pages kostenlos.
+## Anpassen
 
-Teste die URL im Browser – es sollte etwa so aussehen:
+- **Anderes Intervall:** `updateEverySec` (Sekunden) im Script.
+- **Andere Station:** die Stationsnummer in der `url` tauschen (Format
+  `.../OG/<NR>/WT/week.json`). Die Nummer findet man über die OÖ-Hydro-Seite
+  bzw. den WT-Export.
+- **Icon:** `iconUrl` (PNG-URL).
 
-```json
-{"celsius":12.3,"unit":"°C","station":"Ager / Raudaschlsäge","measuredAtText":"06.06. 14:45", ...}
-```
+## Hinweis zum GitHub-Teil
 
-## Schritt 2 – Script hinzufügen (legt die Komponente automatisch an)
-
-Die Number-Komponente musst du **nicht** von Hand erstellen – das Script macht
-das beim ersten Start selbst.
-
-1. Shelly-App → **Walldisplay → Scripts ({})  → Add script**
-   (oder Web-Interface → Scripts).
-2. Inhalt von [`ager-walldisplay.js`](./ager-walldisplay.js) hineinkopieren.
-3. Oben im Script ggf. die `url` (deine Pages-URL aus Schritt 1) prüfen.
-4. **Speichern**, **Start**, und **„Run on startup"** aktivieren.
-5. In der Konsole sollte erscheinen:
-   `Ager: Komponente angelegt -> number:200` und kurz darauf
-   `Ager aktualisiert: 18.8 °C (Stand ...)`.
-
-> Möchtest du die Komponente lieber selbst anlegen (z.B. anderes Icon)? Das geht
-> im **Web-Interface** (Geräte-IP im Browser) → **User-defined components →
-> Create new → Number**. Dann im Script `preferredId` auf die ID setzen.
-
-## Schritt 3 – Kachel rechts unten platzieren
-
-1. Auf dem Homescreen vom oberen Rand **nach unten wischen**.
-2. **+**-Symbol → **Virtual components** → `Ager Raudaschlsäge` auswählen.
-3. Kachelgröße wählen und an die **freie Stelle rechts unten** ziehen.
-
-Fertig – die Kachel zeigt z.B. **12.3 °C** und aktualisiert sich automatisch alle 30 Minuten.
-
----
-
-### Fehlersuche
-- **Kachel bleibt leer / `--`:** Script-Konsole prüfen. Bei `HTTP-Status 404`
-  ist die Pages-URL falsch oder Pages noch nicht aktiv.
-- **`JSON konnte nicht gelesen werden`:** URL zeigt nicht direkt auf die `ager.json`.
-- **Wert veraltet:** Prüfen, ob die GitHub Action „Publish Ager data" zuletzt grün lief.
+Der frühere Weg über eine `ager.json` auf GitHub Pages (Workflow „Publish Ager
+data") wird vom Wall Display **nicht mehr benötigt** – der Shelly liest jetzt
+direkt an der Quelle. Der Workflow kann bleiben oder deaktiviert werden; er hat
+auf das Display keinen Einfluss mehr.
