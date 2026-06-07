@@ -36,19 +36,18 @@ console.log("Ager/Raudaschlsäge SANR =", sanr);
 if (sanr) {
   const base = "https://hydro.ooe.gv.at/daten/internet/stations";
   const candidates = [
-    `${base}/OG/${sanr}/WT/week.json`,
-    `${base}/OG/${sanr}/WT/today.json`,
-    `${base}/OG/${sanr}/WT/day.json`,
-    `${base}/OG/${sanr}/WT/ltv.json`,
+    `${base}/OG/${sanr}/WT/hour.json`,
+    `${base}/OG/${sanr}/WT/current.json`,
+    `${base}/OG/${sanr}/WT/last.json`,
     `${base}/OG/${sanr}/WT/S.json`,
     `${base}/OG/${sanr}/index.json`,
-    `${base}/OG/${sanr}/WT.json`,
   ];
   for (const url of candidates) {
     try {
       const r = await text(url, { headers: { "User-Agent": "Mozilla/5.0" } });
       console.log("----", url, "=>", r.status, "len", r.len);
-      if (r.status === 200) console.log(r.body.slice(0, 300));
+      // index.json komplett ausgeben, um zu sehen, ob der aktuelle Wert drinsteht.
+      if (r.status === 200) console.log(url.indexOf("index.json") !== -1 ? r.body : r.body.slice(0, 200));
     } catch (e) {
       console.log("----", url, "=> ERROR", e.message);
     }
