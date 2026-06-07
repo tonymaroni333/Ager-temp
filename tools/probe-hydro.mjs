@@ -33,6 +33,21 @@ console.log("ZRXP status", zrxp.status, "len", zrxp.len);
 const sanr = findSanr(zrxp.body);
 console.log("Ager/Raudaschlsäge SANR =", sanr);
 
+// Aufbau der week.json zeigen: Spalten + letzte Datenzeilen.
+{
+  const wk = await text(`https://hydro.ooe.gv.at/daten/internet/stations/OG/${sanr}/WT/week.json`,
+    { headers: { "User-Agent": "Mozilla/5.0" } });
+  try {
+    const j = JSON.parse(wk.body);
+    const o = j[0];
+    console.log("WEEK columns:", o.columns);
+    console.log("WEEK rows:", o.rows, "data.length:", o.data.length);
+    console.log("WEEK last3:", JSON.stringify(o.data.slice(-3)));
+  } catch (e) {
+    console.log("WEEK parse error:", e.message, "tail:", wk.body.slice(-300));
+  }
+}
+
 if (sanr) {
   const base = "https://hydro.ooe.gv.at/daten/internet/stations";
   const candidates = [
