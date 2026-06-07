@@ -54,8 +54,8 @@ function applyValue(body) {
 function fetchAndSet() {
   if (numberId === null) return;
   Shelly.call(
-    "HTTP.GET",
-    { url: CONFIG.url, timeout: 15, ssl_ca: "*", headers: { "Range": "bytes=-1500" } },
+    "HTTP.Request",
+    { method: "GET", url: CONFIG.url, timeout: 15, ssl_ca: "*", headers: { "Range": "bytes=-1500" } },
     function (res, err, msg) {
       if (err !== 0 || res === null) { print("Ager: HTTP-Fehler", err, msg); return; }
       // 206 = Range akzeptiert. Nur dann ist das Dateiende (jüngster Wert) enthalten.
